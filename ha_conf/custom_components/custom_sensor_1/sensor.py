@@ -13,16 +13,33 @@ HANDLED:
 
 """
 
-import logging
-from datetime import timedelta
-import async_timeout
-from enum import Enum
-from homeassistant.const import TEMP_CELSIUS
-from homeassistant.config_entries import ConfigEntry
-from homeassistant.core import (callback, HomeAssistant)
-from homeassistant.exceptions import (ConfigEntryAuthFailed, PlatformNotReady)
+
+from custom_components.custom_sensor_1.my_api.client import (
+    MyApiClient, DummyClass)
+from homeassistant.components.sensor import (
+    SensorDeviceClass,
+    SensorEntity,
+    SensorStateClass,
+)
+from homeassistant.helpers.update_coordinator import (
+    CoordinatorEntity,
+    DataUpdateCoordinator,
+    UpdateFailed,
+)
 from homeassistant.helpers.entity_platform import AddEntitiesCallback
-from homeassistant.helpers.update_coordinator import (CoordinatorEntity, DataUpdateCoordinator, UpdateFailed)
+from homeassistant.exceptions import (ConfigEntryAuthFailed, PlatformNotReady)
+from homeassistant.core import callback
+from homeassistant.core import HomeAssistant
+from homeassistant.config_entries import ConfigEntry
+from homeassistant.const import TEMP_CELSIUS
+
+from enum import Enum
+
+import async_timeout
+from datetime import timedelta
+
+import logging
+
 DOMAIN = "custom_sensor_1"
 
 _LOGGER = logging.getLogger(__name__)
