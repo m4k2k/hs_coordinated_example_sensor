@@ -1,0 +1,15 @@
+
+/examples/*
+/ha_conf/.*/*
+/ha_conf/blueprints/*
+/ha_conf/*.db*
+/ha_conf/*.log*
+/ha_conf/.HA_VERSION
+/ha_conf/scenes.yaml
+/ha_conf/scripts.yaml
+/ha_conf/secrets.yaml
+/ha_conf/automations.yaml
+/ha_conf/custom_components/nintendo_wishlist/*
+
+*/__pycache__/*
+*.pyc
