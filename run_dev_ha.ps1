@@ -1,6 +1,12 @@
 
 $conf_folder = 'C:\Dev\Proj\ha_dev\ha_conf'
 
+
+$log_filepath = "$conf_folder\home-assistant.log"
+$log_file = Get-Item -Path $log_filepath
+Rename-Item -Path $log_file.FullName -NewName "$($log_file.BaseName)_$(get-date -f yyyy-MM-dd_H-mm_s)$($log_file.Extension)"
+New-Item -Path $log_file.Directory -Name $log_file.Name -ItemType File
+
 docker run -it --rm `
     -e "TZ=Europe/Berlin" `
     --name "devha" `
