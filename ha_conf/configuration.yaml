@@ -2,6 +2,13 @@
 # Loads default set of integrations. Do not remove.
 default_config:
 
+debugpy:
+  start: true
+  wait: true
+  #host: 127.0.0.1
+  host: 172.17.0.2
+  port: 6712
+
 # Text to speech
 # tts:
 #   - platform: google_translate
@@ -47,4 +54,5 @@ logger:
     # custom_components.example_sensor: debug
     #custom_components.example_sensor: fatal
     custom_components.custom_sensor_1: debug
+    custom_components.custom_sensor_1.my_api: fatal
     
