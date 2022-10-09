@@ -11,6 +11,7 @@ docker run -it --rm `
     -e "TZ=Europe/Berlin" `
     --name "devha" `
     -p 8123:8123 `
+    -p 6712:6712 `
     --mount type=bind,source="$conf_folder",target="/config" `
     homeassistant/home-assistant
 
@@ -20,3 +21,4 @@ docker run -it --rm `
 # pwd: §g23/(egt3253EHF
 
 
+# python -m debugpy --connect 127.0.0.1:6712
