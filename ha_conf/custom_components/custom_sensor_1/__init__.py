@@ -4,7 +4,7 @@
 # TODO: see: https://github.com/jgriss/FusionSolarHA/blob/2549d3d490c8eb187e08ae0efa6c4de02df5dc02/custom_components/fusion_solar/__init__.py
 
 
-DOMAIN = "custom_sensor_1"
+_DOMAIN_ = "custom_sensor_1"
 import logging
 _LOGGER = logging.getLogger(__name__)
 _LOGGER.debug("Starting %s", __file__)
