@@ -250,12 +250,11 @@ class CoordinatedExampleSensor(CoordinatorEntity, SensorEntity):
     _attr_device_class = SensorDeviceClass.TEMPERATURE
     _attr_state_class = SensorStateClass.MEASUREMENT
 
-
     #_attr_extra_state_attributes: dict[str, Any]
 
     _attr_extra_state_attributes: MutableMapping[str, Any]
     #[str, Any] = {"idx": "", "system_state": ""}
-    
+
     # use the keys and assign an empty value
     # its content will be visible in HA
     #extra_attrib: extra_coord_sens = {"idx": "", "system_state": ""}
@@ -319,7 +318,7 @@ class CoordinatedExampleSensor(CoordinatorEntity, SensorEntity):
     # def extra_state_attributes(self) -> MutableMapping[str, Any]:
 
     @property
-    def extra_state_attributes(self)-> MutableMapping[str, Any]:
+    def extra_state_attributes(self) -> MutableMapping[str, Any]:
         """Return extra state attributes."""
         return self._attr_extra_state_attributes
 
