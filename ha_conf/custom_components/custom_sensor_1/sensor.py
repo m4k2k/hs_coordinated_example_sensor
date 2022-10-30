@@ -14,10 +14,14 @@ HANDLED:
 """
 
 
+from ast import For
 from typing import TypedDict
 from dataclasses import replace
+from collections.abc import MutableMapping
 import logging
+from typing import Any
 from datetime import timedelta
+from collections.abc import Coroutine, Iterable, Mapping, MutableMapping
 from tokenize import String
 import async_timeout
 from enum import Enum
@@ -54,27 +58,60 @@ _managed_entity_ids: list[str] = []
 #         _LOGGER.debug(__coordinator_data[key].extra_attributes)
 
 
-async def async_setup_platform(hass: HomeAssistant, config, async_add_entities, discovery_info=None) -> None:
+def assert_check_entities(_entities):
+    _LOGGER.debug("Assert Checking")
+    en1: CoordinatedExampleSensor = _entities[0]
+    if (en1.extra_state_attributes["idx"] == "gg"):
+        _LOGGER.debug("Looking for %s but found %s", "gg",
+                      en1.extra_state_attributes["idx"])
+        return True
+    return False
+
+
+async def async_setup_platform(hass: HomeAssistant, config, async_add_entities: AddEntitiesCallback, discovery_info=None) -> None:
     """Set up platform."""
     _LOGGER.debug("async_setup_platform of sensor.py")
 
-    _managed_entity_ids.append("ee")
-    _managed_entity_ids.append("dd")
+    _managed_entity_ids.append("uu")
+    _managed_entity_ids.append("kk")
+    _managed_entity_ids.append("gg")
 
     _LOGGER.debug("managed entity ids: %s", _managed_entity_ids)
 
     my_api = MyApiClient(username="", password="")
-    coordinator = MyCoordinator(hass, my_api)
+    xcoordinator = MyCoordinator(hass, my_api)
 
-    await coordinator.async_refresh()
-    if not coordinator.last_update_success:
+    await xcoordinator.async_refresh()
+    if not xcoordinator.last_update_success:
         raise PlatformNotReady
 
-    async_add_entities(CoordinatedExampleSensor(
-        _coord=coordinator, _unique_id=_uid) for _uid in _managed_entity_ids)
+    # async_add_entities(CoordinatedExampleSensor(
+    #     _coord=coordinator, _unique_id=_uid) for _uid in _managed_entity_ids)
+
+    # new_entities = {
+    #     entity_id: HueSensor(entity_id, self) for entity_id in new_sensors
+    # }
+    # new_entities = [
+    #     CoordinatedExampleSensor(coord=coordinator, _unique_id=_uid) for _uid in _managed_entity_ids
+    # ]
+
+    # async_add_entities(new_entities, True)^
+
+    ents = []
+
+    ents.append(CoordinatedExampleSensor(coord=xcoordinator, _unique_id="kk"))
+    ents.append(CoordinatedExampleSensor(coord=xcoordinator, _unique_id="uu"))
+    ents.append(CoordinatedExampleSensor(coord=xcoordinator, _unique_id="gg"))
+
+    if (assert_check_entities(ents)):
+        for x in range(20):
+            _LOGGER.debug("FAILED!! %i", x)
+
+    async_add_entities(ents)
+    #async_add_entities(CoordinatedExampleSensor(coord=coordinator, _unique_id="uu"), True)
 
     _LOGGER.debug("current coordinator data:")
-    _LOGGER.debug(coordinator.data)
+    _LOGGER.debug(xcoordinator.data)
 
     _LOGGER.debug("hass-data")
     _LOGGER.debug(hass.data['integrations'][_DOMAIN_])
@@ -191,9 +228,9 @@ class MyCoordinator(DataUpdateCoordinator):
             raise UpdateFailed(f"Error communicating with API: {err}")
 
 
-class extra_coord_sens(TypedDict):
-    system_state: str
-    idx: str
+# class extra_coord_sens(TypedDict):
+#     system_state: str
+#     idx: str
 
 
 class CoordinatedExampleSensor(CoordinatorEntity, SensorEntity):
@@ -213,9 +250,16 @@ class CoordinatedExampleSensor(CoordinatorEntity, SensorEntity):
     _attr_device_class = SensorDeviceClass.TEMPERATURE
     _attr_state_class = SensorStateClass.MEASUREMENT
 
+
+    #_attr_extra_state_attributes: dict[str, Any]
+
+    _attr_extra_state_attributes: MutableMapping[str, Any]
+    #[str, Any] = {"idx": "", "system_state": ""}
+    
     # use the keys and assign an empty value
     # its content will be visible in HA
-    extra_attrib: extra_coord_sens = {"idx": "", "system_state": ""}
+    #extra_attrib: extra_coord_sens = {"idx": "", "system_state": ""}
+    #extra_attrib = {"idx": "", "system_state": ""}
 
     def get_sensor_value(self) -> int:
         """Retrieve the current sensor value from the coordinator
@@ -224,11 +268,11 @@ class CoordinatedExampleSensor(CoordinatorEntity, SensorEntity):
         """
         _LOGGER.debug("_get_data of CoordinatedExampleSensor")
         _LOGGER.debug("getting sensor value for id: %s",
-                      self.extra_attrib["idx"])
-        entity_id = self.extra_attrib["idx"]
+                      self.extra_state_attributes["idx"])
+        entity_id = self.extra_state_attributes["idx"]
         __dummy_data: DummyClass = self._coord.data[entity_id]
         value = __dummy_data.dummyvalue
-        value = self._coord.data[self.extra_attrib["idx"]].dummyvalue
+        value = self._coord.data[self.extra_state_attributes["idx"]].dummyvalue
         _LOGGER.debug("current self.__coordinator.data:")
         _LOGGER.debug(self._coord.data)
         _LOGGER.debug("returning %i", value)
@@ -237,54 +281,73 @@ class CoordinatedExampleSensor(CoordinatorEntity, SensorEntity):
     def get_sensor_system_state(self) -> str:
         _LOGGER.debug("_get_sensor_system_state of CoordinatedExampleSensor")
         _LOGGER.debug("getting sensor system state for id: %s",
-                      self.extra_attrib["idx"])
+                      self.extra_state_attributes["idx"])
         # value = "fixed-offline"
-        value = self._coord.data[self.extra_attrib["idx"]].dummystate
+        value = self._coord.data[self.extra_state_attributes["idx"]].dummystate
         _LOGGER.debug("returning %s", value)
         return value
 
     def update_all_data(self) -> None:
         # not rquired, but recommended updates all properties and values of the entity(sensor)
         _LOGGER.debug("update_all_data of CoordinatedExampleSensor")
-        _LOGGER.debug("enter for id: %s", self.extra_attrib["idx"])
+        _LOGGER.debug("update_all_data for id: %s",
+                      self.extra_state_attributes["idx"])
         _LOGGER.debug("current self.__coordinator.data:")
         _LOGGER.debug(self._coord.data)
-        self._attr_native_value = self.get_sensor_value()
-        self.extra_attrib["idx"] = self.get_sensor_system_state()
+        #self._attr_native_value = self.get_sensor_value()
+        # self.extra_state_attributes["system_state"] = self.get_sensor_system_state(
+        # )
         # not working: log_entities(self.hass)
 
+    # def extra_state_attributes(self) -> extra_coord_sens:
+    # @property
+    # def extra_state_attributes(self) -> dict:
+    #     """Return entity specific state attributes."""
+    #     _LOGGER.debug("enter for id: %s", self.extra_attrib["idx"])
+    #     # required to store your own attributes, like _attr_testprop
+    #     # should only be done the state is of the own attributes are not changed frequently
+    #     # else you should use another sensor
+    #     _LOGGER.debug("extra_state_attributes of CoordinatedExampleSensor")
+    #     #return {"idx": self.extra_attrib["idx"], "system_state": self.extra_attrib["system_state"]}
+    #     #return self.extra_attrib
+    #     return super().extra_state_attributes
+
+    # @property
+    # def extra_state_attributes(self) -> Mapping[str, Any]:
+    #     return self._attr_extra_state_attributes
+    # @property
+    # def extra_state_attributes(self) -> MutableMapping[str, Any]:
+
     @property
-    def extra_state_attributes(self) -> extra_coord_sens:
-        """Return entity specific state attributes."""
-        _LOGGER.debug("enter for id: %s", self.extra_attrib["idx"])
-        # required to store your own attributes, like _attr_testprop
-        # should only be done the state is of the own attributes are not changed frequently
-        # else you should use another sensor
-        _LOGGER.debug("extra_state_attributes of CoordinatedExampleSensor")
-        return self.extra_attrib
+    def extra_state_attributes(self)-> MutableMapping[str, Any]:
+        """Return extra state attributes."""
+        return self._attr_extra_state_attributes
 
     @callback
     def _handle_coordinator_update(self) -> None:
         """Handle updated data from the coordinator."""
         _LOGGER.debug("_handle_coordinator_update of CoordinatedExampleSensor")
-        _LOGGER.debug("enter for id: %s", self.extra_attrib["idx"])
+        _LOGGER.debug("enter for id: %s of entity %s",
+                      self.extra_state_attributes["idx"], self.entity_id)
         # gets triggered, triggers the pull of the data from the coordinator
         # gets triggered after the coordinator has finished getting updates
-        _LOGGER.debug("current self.__coordinator data:")
+        _LOGGER.debug("current self._coord.data:")
         _LOGGER.debug(self._coord.data)
         self.update_all_data()
         # self.async_write_ha_state()
         log_entities_all(self.hass)
         return super()._handle_coordinator_update()
 
-    def __init__(self, _coord: MyCoordinator, _unique_id: str) -> None:
+    def __init__(self, coord: MyCoordinator, _unique_id: str) -> None:
+        super().__init__(coord)
         """Pass coordinator to CoordinatorEntity."""
         _LOGGER.debug("__init__ of CoordinatedExampleSensor %s", _unique_id)
         _LOGGER.debug("current _coordinator data:")
-        _LOGGER.debug(_coord.data)
+        _LOGGER.debug(coord.data)
         # log_debug_all_items(_coordinator.data)
-        self._coord = _coord
-        _LOGGER.debug("current self.__coordinator data:")
+        self._coord = coord
+        #self.coordinator = coord
+        _LOGGER.debug("current self._coord.data:")
         _LOGGER.debug(self._coord.data)
         # log_debug_all_items(self.__coordinator.data)
         if (self._attr_name is not None):
@@ -292,15 +355,16 @@ class CoordinatedExampleSensor(CoordinatorEntity, SensorEntity):
         else:
             dum = ""
         self._attr_name = dum.replace("Dummy", _unique_id)
-        # self.extra_attrib["idx"] = _unique_id
-        # AttributeError: 'CoordinatedExampleSensor' object has no attribute 'extra_attrib'
         # TODO: solve issue where object not existing (needs to be created / new)
+        # self._attr_extra_state_attributes
+        #self._attr_extra_state_attributes: MutableMapping[str, Any] = MutableMapping()
+        self._attr_extra_state_attributes: MutableMapping[str, Any] = dict()
+        #self._attr_extra_state_attributes: dict[str, Any] = dict()
+        self._attr_extra_state_attributes["idx"] = _unique_id
+        # self.update_all_data()
+        # TEST DISABLE
+        # TODO: Enable again
 
-        #self.extra_attrib = extra_coord_sens()
-
-        self.extra_attrib["idx"] = _unique_id
-        self.update_all_data()
-        super().__init__(_coord)
         # log_debug_all_items(_coordinator.data)
         #raise "hier"
         # TODO: Find issue why the second attribute gets overwriten
