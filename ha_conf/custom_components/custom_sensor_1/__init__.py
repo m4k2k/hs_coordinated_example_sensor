@@ -1,3 +1,4 @@
+import logging
 """Custom Sensor 1"""
 
 # TODO: inti coordinator here
@@ -5,10 +6,8 @@
 
 
 _DOMAIN_ = "custom_sensor_1"
-import logging
 _LOGGER = logging.getLogger(__name__)
 _LOGGER.debug("Starting %s", __file__)
-
 
 
 # from homeassistant.config_entries import ConfigEntry
