@@ -100,7 +100,6 @@ class MyCoordinator(DataUpdateCoordinator[Any]):
             # Note: asyncio.TimeoutError and aiohttp.ClientError are already
             # handled by the data update coordinator.
             async with async_timeout.timeout(10):
-                # return await self.my_api.get_dummy_data()
                 _LOGGER.debug("start self.my_api.get_dummy_data()")
                 # call api to get the data object
                 # put the dataobject into the HA-store
@@ -108,6 +107,7 @@ class MyCoordinator(DataUpdateCoordinator[Any]):
                 for __uid in _managed_entity_ids:
                     _LOGGER.debug("calling api for id: %s", __uid)
                     # here you could also do an if id = "abc" then talk to api-a else api-b
+                    # await self.my_api.get_dummy_data()
                     dummy_data: DummyClass = self._my_api.get_dummy_data()
                     coordinator_data[__uid] = dummy_data
                 _LOGGER.debug("returning cordinator_data:")
@@ -189,9 +189,8 @@ class CoordinatedExampleSensor(CoordinatorEntity[Any], SensorEntity):
                       self.extra_state_attributes["idx"])
         _LOGGER.debug("current self.__coordinator.data:")
         _LOGGER.debug(self._coord.data)
-        #self._attr_native_value = self.get_sensor_value()
-        # self.extra_state_attributes["system_state"] = self.get_sensor_system_state(
-        # )
+        self._attr_native_value = self.get_sensor_value()
+        self.extra_state_attributes["system_state"] = self.get_sensor_system_state()
         # not working: log_entities(self.hass)
 
     # def extra_state_attributes(self) -> extra_coord_sens:
@@ -249,14 +248,16 @@ class CoordinatedExampleSensor(CoordinatorEntity[Any], SensorEntity):
             dum: str = self._attr_name
         else:
             dum = ""
-        self._attr_name = dum.replace("Dummy", _unique_id)
+        self._attr_name = str(dum.replace("Dummy", _unique_id))
         # TODO: solve issue where object not existing (needs to be created / new)
         # self._attr_extra_state_attributes
         #self._attr_extra_state_attributes: MutableMapping[str, Any] = MutableMapping()
-        self._attr_extra_state_attributes: MutableMapping[str, Any] = dict()
+        self._attr_extra_state_attributes: MutableMapping[str, Any] = dict(
+            {"idx": "", "system_state": ""})
+        #
         #self._attr_extra_state_attributes: dict[str, Any] = dict()
         self._attr_extra_state_attributes["idx"] = _unique_id
-        # self.update_all_data()
+        self.update_all_data()
         # TEST DISABLE
         # TODO: Enable again
 
@@ -269,16 +270,6 @@ class CoordinatedExampleSensor(CoordinatorEntity[Any], SensorEntity):
         # TODO: For debug purpose write functions which finds and logs all info
         # of CoordinatedExampleSensor Objects in HA entities store
         # not working, producing error log_entities(self.hass)
-
-
-def assert_check_entities(_entities: list[CoordinatedExampleSensor]):
-    _LOGGER.debug("Assert Checking")
-    en1: CoordinatedExampleSensor = _entities[0]
-    if (en1.extra_state_attributes["idx"] == "gg"):
-        _LOGGER.debug("Looking for %s but found %s", "gg",
-                      en1.extra_state_attributes["idx"])
-        return True
-    return False
 
 
 async def async_setup_platform(hass: HomeAssistant, config: ConfigType, async_add_entities: AddEntitiesCallback, discovery_info: DiscoveryInfoType | None = None) -> None:
@@ -315,10 +306,6 @@ async def async_setup_platform(hass: HomeAssistant, config: ConfigType, async_ad
     ents.append(CoordinatedExampleSensor(coord=xcoordinator, _unique_id="kk"))
     ents.append(CoordinatedExampleSensor(coord=xcoordinator, _unique_id="uu"))
     ents.append(CoordinatedExampleSensor(coord=xcoordinator, _unique_id="gg"))
-
-    if (assert_check_entities(ents)):
-        for x in range(20):
-            _LOGGER.debug("FAILED!! %i", x)
 
     async_add_entities(ents)
     #async_add_entities(CoordinatedExampleSensor(coord=coordinator, _unique_id="uu"), True)
