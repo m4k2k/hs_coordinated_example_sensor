@@ -41,7 +41,6 @@ NOT:
 HANDLED:
 
 
-
 """
 
 
@@ -66,7 +65,7 @@ _managed_entity_ids: list[str] = []
 #         _LOGGER.debug(__coordinator_data[key].extra_attributes)
 
 
-class MyCoordinator(DataUpdateCoordinator):
+class MyCoordinator(DataUpdateCoordinator[Any]):
     """My custom coordinator."""
     _my_api: MyApiClient
     _LOGGER.debug("Class MyCoordinator")
@@ -89,7 +88,8 @@ class MyCoordinator(DataUpdateCoordinator):
         _LOGGER.debug("managed entity ids: %s", _managed_entity_ids)
         log_entities_all(hass)
 
-    # TODO: Replace dict[DummyClass] -> in this case, a list of dummyclass is stored - but it doesnt need to be a dict
+    # TODO: Replace dict[DummyClass]
+    # -> in this case a list of dummyclass is stored - but it doesnt need to be a dict
     async def _async_update_data(self) -> dict[Any, Any]:
         """Fetch data from API endpoint.
         This is the place to pre-process the data to lookup tables
@@ -129,7 +129,7 @@ class MyCoordinator(DataUpdateCoordinator):
 #     idx: str
 
 
-class CoordinatedExampleSensor(CoordinatorEntity, SensorEntity):
+class CoordinatedExampleSensor(CoordinatorEntity[Any], SensorEntity):
     """An entity using CoordinatorEntity.
     The CoordinatorEntity class provides:
         should_poll
@@ -310,7 +310,7 @@ async def async_setup_platform(hass: HomeAssistant, config: ConfigType, async_ad
 
     # async_add_entities(new_entities, True)^
 
-    ents = []
+    ents: list[Any] = []
 
     ents.append(CoordinatedExampleSensor(coord=xcoordinator, _unique_id="kk"))
     ents.append(CoordinatedExampleSensor(coord=xcoordinator, _unique_id="uu"))
