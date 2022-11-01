@@ -51,9 +51,8 @@ logger:
     # homeassistant.components.python_script.my_new_script.py: debug
 
     # log level for a custom component
-    #custom_components.my_integration: debug
-    # custom_components.example_sensor: debug
-    #custom_components.example_sensor: fatal
     custom_components.custom_sensor_1: debug
     custom_components.custom_sensor_1.my_api: fatal
-    
+    custom_components.custom_sensor_1.sensor: fatal
+    custom_components.custom_sensor_1.sensor.MyCoordinator: debug
+    custom_components.custom_sensor_1.sensor.CoordinatedExampleSensor: debug
