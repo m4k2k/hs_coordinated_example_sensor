@@ -5,7 +5,7 @@
     "reportIncompatibleVariableOverride": "information"
   },
   "python.linting.pylamaArgs": [
-    "--ignore=E265,E501",
+    "--ignore=E265,E501,E128",
   ],
   "python.linting.pylintEnabled": false,
   "python.linting.enabled": true,
