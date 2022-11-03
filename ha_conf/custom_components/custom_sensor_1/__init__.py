@@ -1,4 +1,5 @@
 import logging
+
 """Custom Sensor 1"""
 
 # TODO: inti coordinator here
