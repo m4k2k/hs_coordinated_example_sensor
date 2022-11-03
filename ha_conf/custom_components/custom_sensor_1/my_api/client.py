@@ -1,7 +1,7 @@
 """my_api client"""
 
-import random
 import logging
+import random
 
 # global logger object
 _LOGGER = logging.getLogger(__name__)
@@ -11,8 +11,8 @@ _LOGGER.debug("Starting %s", __file__)
 class DummyClass:
     """Class representing the object which will be returned by the client"""
     """All attributes which should be returned will be listed here"""
-    dummystate: str = ""
-    dummyvalue: int = 0
+    dummystate: str
+    dummyvalue: int
 
     _LOGGER.debug("Class DummyClass")
 
@@ -25,8 +25,11 @@ class DummyClass:
         self.dummystate = dummystate
         self.dummyvalue = dummyvalue
 
-    def get_dummystate() -> str: return self.dummystate
-    def get_dummyvalue() -> int: return self.dummyvalue
+    def get_dummystate(self) -> str:
+        return self.dummystate
+
+    def get_dummyvalue(self) -> int:
+        return self.dummyvalue
 
 
 class MyApiClient:
