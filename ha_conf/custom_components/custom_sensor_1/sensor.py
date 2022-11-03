@@ -91,12 +91,10 @@ class MyCoordinator(DataUpdateCoordinator[Any]):
                 for __uid in _managed_entity_ids:
                     self._LOGLCL.debug("calling api for id: %s", __uid)
                     # here you could also do an if id = "abc" then talk to api-a else api-b
-                    # await self.my_api.get_dummy_data()
                     dummy_data: DummyClass = self._my_api.get_dummy_data()
                     coordinator_data[__uid] = dummy_data
                 self._LOGLCL.debug("returning cordinator_data:")
                 self._LOGLCL.debug(coordinator_data)
-                # log_debug_all_items(coordinator_data)
                 log_entities_all(self.hass)
                 return coordinator_data
 
