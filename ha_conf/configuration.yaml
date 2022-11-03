@@ -54,5 +54,5 @@ logger:
     custom_components.custom_sensor_1: debug
     custom_components.custom_sensor_1.my_api: fatal
     custom_components.custom_sensor_1.sensor: fatal
-    custom_components.custom_sensor_1.sensor.MyCoordinator: debug
-    custom_components.custom_sensor_1.sensor.CoordinatedExampleSensor: debug
+    custom_components.custom_sensor_1.sensor.MyCoordinator: info
+    custom_components.custom_sensor_1.sensor.CoordinatedExampleSensor: info
