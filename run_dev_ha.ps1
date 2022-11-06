@@ -9,7 +9,7 @@ $log_file = Get-Item -Path $log_filepath
 $new_log_file = "$($log_file.BaseName)_$(get-date -f yyyy-MM-dd_H-mm_s)$($log_file.Extension)"
 Rename-Item -Path $log_file.FullName -NewName $new_log_file
 New-Item -Path $log_file.Directory -Name $log_file.Name -ItemType File
-New-Item -Path "$conf_folder\" -Name $old_log_folder -ItemType Directory
+New-Item -Path "$conf_folder\" -Name $old_log_folder -ItemType Directory -ErrorAction Ignore
 Move-Item -Path "$conf_folder\$new_log_file" -Destination "$conf_folder\$old_log_folder\"
 
 $conf_entries_file = "$conf_folder\.storage\core.config_entries"
