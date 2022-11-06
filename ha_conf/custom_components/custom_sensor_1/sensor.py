@@ -9,7 +9,7 @@ from custom_components.custom_sensor_1.my_api.client import (DummyClass,
 from homeassistant.components.sensor import (SensorDeviceClass, SensorEntity,
                                              SensorStateClass)
 from homeassistant.const import TEMP_CELSIUS
-from homeassistant.core import HomeAssistant, callback
+from homeassistant.core import HomeAssistant, callback  # , State
 from homeassistant.exceptions import ConfigEntryAuthFailed, PlatformNotReady
 from homeassistant.helpers.entity_platform import AddEntitiesCallback
 from homeassistant.helpers.typing import ConfigType, DiscoveryInfoType
@@ -17,23 +17,8 @@ from homeassistant.helpers.update_coordinator import (CoordinatorEntity,
                                                       DataUpdateCoordinator,
                                                       UpdateFailed)
 
-"""
-#from .const import DOMAIN
-#from homeassistant.helpers.template import device_entities
-#from homeassistant.config_entries import ConfigEntry
-#from enum import Enum
-#from typing import TypedDict
-#from dataclasses import replace
-#from homeassistant.helpers.template import integration_entities
-#from homeassistant.helpers.entity_registry import async_get
-#from collections.abc import Coroutine, Iterable, Mapping
-#from tokenize import String
-"""
+"""Example integration using DataUpdateCoordinator.
 
-"""Example integration using DataUpdateCoordinator."""
-
-
-"""
 What is handled - and what is not:
 
 NOT:
@@ -70,7 +55,6 @@ class MyCoordinator(DataUpdateCoordinator[Any]):
         )
         self._my_api = my_api
         self._LOGLCL.debug("managed entity ids: %s", _managed_entity_ids)
-        log_entities_all(hass)
 
     # TODO: Replace dict[DummyClass]
     # -> in this case a list of dummyclass is stored - but it doesnt need to be a dict
@@ -95,7 +79,6 @@ class MyCoordinator(DataUpdateCoordinator[Any]):
                     coordinator_data[__uid] = dummy_data
                 self._LOGLCL.debug("returning cordinator_data:")
                 self._LOGLCL.debug(coordinator_data)
-                log_entities_all(self.hass)
                 return coordinator_data
 
         except ConfigEntryAuthFailed as err:
@@ -105,10 +88,6 @@ class MyCoordinator(DataUpdateCoordinator[Any]):
         except UpdateFailed as err:
             raise UpdateFailed(f"Error communicating with API: {err}")
 
-
-# class extra_coord_sens(TypedDict):
-#     system_state: str
-#     idx: str
 
 class CoordinatedExampleSensor(CoordinatorEntity[Any], SensorEntity):
     """An entity using CoordinatorEntity.
@@ -128,11 +107,6 @@ class CoordinatedExampleSensor(CoordinatorEntity[Any], SensorEntity):
     _attr_device_class = SensorDeviceClass.TEMPERATURE
     _attr_state_class = SensorStateClass.MEASUREMENT
     _attr_extra_state_attributes: MutableMapping[str, Any]
-    #extra_attrib: extra_coord_sens = {"idx": "", "system_state": ""}
-
-    def log_debug_coordinator_data(self) -> None:
-        self._LOGLCL.debug("current self.__coordinator.data:")
-        self._LOGLCL.debug(self._coord.data)
 
     def get_sensor_value(self) -> int:
         """Retrieve the current sensor value from the coordinator
@@ -143,7 +117,6 @@ class CoordinatedExampleSensor(CoordinatorEntity[Any], SensorEntity):
         self._LOGLCL.info(
             "get_sensor_value for CoordinatedExampleSensor from coordinator_data for id: %s", entity_idx)
         retval: int = self._coord.data[entity_idx].dummyvalue
-        self.log_debug_coordinator_data()
         self._LOGLCL.info("returning %i", retval)
         return retval
 
@@ -152,30 +125,15 @@ class CoordinatedExampleSensor(CoordinatorEntity[Any], SensorEntity):
         self._LOGLCL.info(
             "get_sensor_system_state for CoordinatedExampleSensor from coordinator_data for id: %s", entity_idx)
         retval: str = self._coord.data[entity_idx].dummystate
-        self.log_debug_coordinator_data()
         self._LOGLCL.info("returning %s", retval)
         return retval
 
     def update_all_data(self) -> None:
         self._LOGLCL.info("update_all_data of CoordinatedExampleSensor for id: %s",
                           self.extra_state_attributes["idx"])
-        self.log_debug_coordinator_data()
         self._attr_native_value = self.get_sensor_value()
         self.extra_state_attributes["system_state"] = self.get_sensor_system_state(
         )
-
-    # def extra_state_attributes(self) -> extra_coord_sens:
-    # @property
-    # def extra_state_attributes(self) -> dict:
-    #     """Return entity specific state attributes."""
-    #     _LOGGER.debug("enter for id: %s", self.extra_attrib["idx"])
-    #     # required to store your own attributes, like _attr_testprop
-    #     # should only be done the state is of the own attributes are not changed frequently
-    #     # else you should use another sensor
-    #     _LOGGER.debug("extra_state_attributes of CoordinatedExampleSensor")
-    #     #return {"idx": self.extra_attrib["idx"], "system_state": self.extra_attrib["system_state"]}
-    #     #return self.extra_attrib
-    #     return super().extra_state_attributes
 
     @property
     def extra_state_attributes(self) -> MutableMapping[str, Any]:
@@ -191,44 +149,36 @@ class CoordinatedExampleSensor(CoordinatorEntity[Any], SensorEntity):
                            self.extra_state_attributes["idx"], self.entity_id)
         # gets triggered, triggers the pull of the data from the coordinator
         # gets triggered after the coordinator has finished getting updates
-        self.log_debug_coordinator_data()
         self.update_all_data()
         # self.async_write_ha_state()
-        log_entities_all(self.hass)
         return super()._handle_coordinator_update()
 
     def __init__(self, coord: MyCoordinator, _unique_id: str) -> None:
         super().__init__(coord)
+        # super(CoordinatorEntity).__init__(coord)
+        # super(SensorEntity).__init__()
         """Pass coordinator to CoordinatorEntity."""
         self._LOGLCL.debug(
             "__init__ of CoordinatedExampleSensor %s", _unique_id)
         self._LOGLCL.debug("current _coordinator data:")
         self._LOGLCL.debug(coord.data)
-        # log_debug_all_items(_coordinator.data)
         self._coord = coord
-        self.log_debug_coordinator_data()
-        # log_debug_all_items(self.__coordinator.data)
         if (self._attr_name is not None):
             dum: str = self._attr_name
         else:
             dum = ""
         self._attr_name = str(dum.replace("Dummy", _unique_id))
-        # TODO: solve issue where object not existing (needs to be created / new)
-        #self._attr_extra_state_attributes: MutableMapping[str, Any] = MutableMapping()
         self._attr_extra_state_attributes: MutableMapping[str, Any] = dict(
             {"idx": "", "system_state": ""})
-        #
-        #self._attr_extra_state_attributes: dict[str, Any] = dict()
         self._attr_extra_state_attributes["idx"] = _unique_id
         self.update_all_data()
-        # log_debug_all_items(_coordinator.data)
 
 
 async def async_setup_platform(hass: HomeAssistant, config: ConfigType, async_add_entities: AddEntitiesCallback, discovery_info: DiscoveryInfoType | None = None) -> None:
     """Set up platform."""
     _LOGGER.debug("async_setup_platform of %s", __file__)
 
-    _managed_entity_ids.append("e1")
+    _managed_entity_ids.append("uzttra")
     _managed_entity_ids.append("f1")
     _managed_entity_ids.append("g1")
 
@@ -244,54 +194,78 @@ async def async_setup_platform(hass: HomeAssistant, config: ConfigType, async_ad
     async_add_entities(CoordinatedExampleSensor(
         coord=xcoordinator, _unique_id=_uid) for _uid in _managed_entity_ids)
 
-    _LOGGER.debug("current coordinator data:")
-    _LOGGER.debug(xcoordinator.data)
+    _LOEX = logging.getLogger(__name__ + ".experimental")
+    _LOEX.debug("hass.data")
+    _LOEX.debug(hass.data)
 
+
+    # 'custom_sensor_1': [<EntityPlatform domain=sensor platform_name=custom_sensor_1 config_entry=None>]}
+    # 'custom_sensor_1': [<EntityPlatform domain=sensor platform_name=custom_sensor_1 config_entry=None>]}
+
+    # 'integrations': {
+    # 'custom_sensor_1': <Integration custom_sensor_1: custom_components.custom_sensor_1>},
+    # 'custom_components': {'custom_sensor_1': <Integration custom_sensor_1: custom_components.custom_sensor_1>,
+    # 'example_sensor': <Integration example_sensor: custom_components.example_sensor>,
+    # 'custom_sensor_1': <Integration custom_sensor_1: custom_components.custom_sensor_1>},
+    # 'custom_components': {'custom_sensor_1': <Integration custom_sensor_1: custom_components.custom_sensor_1>}
+
+    # , 'custom_sensor_1': [<EntityPlatform domain=sensor platform_name=custom_sensor_1 config_entry=None>]}, 
+
+    
+
+def log_debug_coordinator_data(_coord: MyCoordinator) -> None:
+    _LOGGER.debug("current self.__coordinator.data:")
+    _LOGGER.debug(_coord.data)
+
+
+def log_debug_domains(_hass: HomeAssistant):
+    _LOGLCL = logging.getLogger(__name__ + ".debug_domains")
+    _LOGLCL.debug("ENTER: log_domains")
+    #_LOGLCL.debug("Start Domains:")
+    #do: list[State] = _hass.states.async_all()
+    #_LOGLCL.debug("Done Domains")
+    _LOGLCL.debug("Start Domains2")
+    count_all: int = 0
+    domains: list[str] = []
+    for entity_id in _hass.states.entity_ids():
+        count_all = count_all + 1
+        entity_domain = entity_id.split('.')[0]
+        if entity_domain not in domains:
+            domains.append(entity_domain)
+    _LOGLCL.debug("found %i domains", count_all)
+    _LOGLCL.debug(domains)
+    _LOGLCL.debug("Done Domains2")
+    _LOGLCL.debug("LEAVE: log_domains")
+
+
+def log_debug_other(coo: MyCoordinator, hass: HomeAssistant):
+    _LOGGER.debug("current coordinator data:")
+    _LOGGER.debug(coo.data)
     _LOGGER.debug("hass-data")
     _LOGGER.debug(hass.data['integrations'][_DOMAIN_])
 
-    log_entities_all(hass)
 
-
-def log_domains(_hass: HomeAssistant):
-    _LOGGER.debug("ENTER: log_domains")
-    _LOGGER.debug("DOMAIN LOGGIN DISABLED")
-    # _LOGGER.debug("Start Domains:")
-    # do = _hass.states.async_all()
-    # _LOGGER.debug(do.domain)
-    # _LOGGER.debug("Done Domains")
-    # _LOGGER.debug("Start Domains2:")
-    # for entity_id in _hass.states.entity_ids():
-    #     count_all = count_all + 1
-    #     entity_domain = entity_id.split('.')[0]
-    #     if entity_domain not in domains:
-    #         domains.append(entity_domain)
-    # _LOGGER.debug(domains)
-    # _LOGGER.debug("Done Domains2:")
-    _LOGGER.debug("LEAVE: log_domains")
-
-
-def log_entity_ids(_hass: HomeAssistant):
-    _LOGGER.debug("ENTER: log_entity_ids")
+def log_debug_entity_ids(_hass: HomeAssistant):
+    _LOGLCL = logging.getLogger(__name__ + ".debug_entity_ids")
+    _LOGLCL.debug("ENTER: log_entity_ids")
     re = _hass.states.async_entity_ids()
-    _LOGGER.debug("print all:")
+    _LOGLCL.debug("print all:")
     for r in re:
-        _LOGGER.debug(r)
-    _LOGGER.debug("LEAVE: log_entity_ids")
+        _LOGLCL.debug(r)
+    _LOGLCL.debug("LEAVE: log_entity_ids")
     # ent = integration_entities(hass,_DOMAIN_)
     # _LOGGER.debug("entieees")
     # _LOGGER.debug(ent)
 
 
-def log_entities_all(_hass: HomeAssistant):
-    _LOGGER.debug("ENTER: log_entities_all")
-    _LOGGER.debug("get all states/sensors")
+def log_debug_entities_all(_hass: HomeAssistant):
+    # not sure if shows devices (not all entities!)
+    _LOGLCL = logging.getLogger(__name__ + ".debug_entities_all")
+    _LOGLCL.debug("ENTER: log_entities_all")
+    _LOGLCL.debug("get all states/sensors")
     re = _hass.states.async_all()
-    _LOGGER.debug("show how many:")
-    _LOGGER.debug(len(re))
-    _LOGGER.debug("print all:")
+    _LOGLCL.debug("show how many: %i", len(re))
+    _LOGLCL.debug("show all:")
     for r in re:
-        _LOGGER.debug(r)
-    _LOGGER.debug("LEAVE: log_entities_all")
-    log_entity_ids(_hass)
-    log_domains(_hass)
+        _LOGLCL.debug(r)
+    _LOGLCL.debug("LEAVE: log_entities_all")
