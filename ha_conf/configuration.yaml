@@ -29,13 +29,13 @@ sensor:
 
 # Example configuration.yaml entry
 logger:
-  default: warning
+  default: fatal
   logs:
     # log level for HA core
     homeassistant.core: fatal
 
     # log level for MQTT integration
-    homeassistant.components.mqtt: warning
+    homeassistant.components.mqtt: fatal
 
     # log level for the `aiohttp` Python package
     aiohttp: error
@@ -44,15 +44,21 @@ logger:
     homeassistant.components.glances: fatal
     glances_api: fatal
 
+    homeassistant.loader: fatal
+
     # log level for all python scripts
-    homeassistant.components.python_script: warning
+    homeassistant.components.python_script: fatal
 
     # individual log level for this python script
     # homeassistant.components.python_script.my_new_script.py: debug
 
     # log level for a custom component
-    custom_components.custom_sensor_1: debug
+    custom_components.custom_sensor_1: fatal
     custom_components.custom_sensor_1.my_api: fatal
     custom_components.custom_sensor_1.sensor: fatal
-    custom_components.custom_sensor_1.sensor.MyCoordinator: info
-    custom_components.custom_sensor_1.sensor.CoordinatedExampleSensor: info
+    custom_components.custom_sensor_1.sensor.MyCoordinator: fatal
+    custom_components.custom_sensor_1.sensor.CoordinatedExampleSensor: fatal
+    custom_components.custom_sensor_1.sensor.experimental: debug
+    custom_components.custom_sensor_1.sensor.debug_domains: fatal
+    custom_components.custom_sensor_1.sensor.debug_entities_all: fatal
+    custom_components.custom_sensor_1.sensor.debug_entity_ids: fatal
