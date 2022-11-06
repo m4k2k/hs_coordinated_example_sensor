@@ -31,6 +31,7 @@ HANDLED:
 
 _DOMAIN_ = "custom_sensor_1"
 _LOGGER = logging.getLogger(__name__)
+_LOEX = logging.getLogger(__name__ + ".experimental")
 _LOGGER.debug("Starting %s", __file__)
 
 _managed_entity_ids: list[str] = []
@@ -43,16 +44,27 @@ class MyCoordinator(DataUpdateCoordinator[Any]):
 
     def __init__(self, hass: HomeAssistant, my_api: MyApiClient):
         self._LOGLCL.debug("__init__ of MyCoordinator Class")
-        super().__init__(
-            hass,
-            _LOGGER,
+        DataUpdateCoordinator.__init__(
+            self=self,
+            hass=hass,
+            logger=_LOGGER,
             # Name of the data. For logging purposes.
             name=_DOMAIN_,
             update_method=self._async_update_data,
             # Polling interval. Will only be polled if there are subscribers.
             # default is usually 30 seconds
-            update_interval=timedelta(seconds=40),
+            update_interval=timedelta(seconds=40)
         )
+        # super().__init__(
+        #     hass,
+        #     _LOGGER,
+        #     # Name of the data. For logging purposes.
+        #     name=_DOMAIN_,
+        #     update_method=self._async_update_data,
+        #     # Polling interval. Will only be polled if there are subscribers.
+        #     # default is usually 30 seconds
+        #     update_interval=timedelta(seconds=40),
+        # )
         self._my_api = my_api
         self._LOGLCL.debug("managed entity ids: %s", _managed_entity_ids)
 
@@ -108,6 +120,8 @@ class CoordinatedExampleSensor(CoordinatorEntity[Any], SensorEntity):
     _attr_state_class = SensorStateClass.MEASUREMENT
     _attr_extra_state_attributes: MutableMapping[str, Any]
 
+#    _attr_unique_id: str
+
     def get_sensor_value(self) -> int:
         """Retrieve the current sensor value from the coordinator
         :return: The current value
@@ -154,7 +168,10 @@ class CoordinatedExampleSensor(CoordinatorEntity[Any], SensorEntity):
         return super()._handle_coordinator_update()
 
     def __init__(self, coord: MyCoordinator, _unique_id: str) -> None:
-        super().__init__(coord)
+        # pyright: reportUnknownMemberType=information
+        CoordinatorEntity.__init__(self, coord)
+        SensorEntity.__init__(self)
+        # super().__init__(coord)
         # super(CoordinatorEntity).__init__(coord)
         # super(SensorEntity).__init__()
         """Pass coordinator to CoordinatorEntity."""
@@ -172,6 +189,8 @@ class CoordinatedExampleSensor(CoordinatorEntity[Any], SensorEntity):
             {"idx": "", "system_state": ""})
         self._attr_extra_state_attributes["idx"] = _unique_id
         self.update_all_data()
+        self._attr_unique_id = f"{_DOMAIN_}.{_unique_id}"
+        _LOEX.debug("self.unique_id: %a", self.unique_id)
 
 
 async def async_setup_platform(hass: HomeAssistant, config: ConfigType, async_add_entities: AddEntitiesCallback, discovery_info: DiscoveryInfoType | None = None) -> None:
@@ -194,10 +213,9 @@ async def async_setup_platform(hass: HomeAssistant, config: ConfigType, async_ad
     async_add_entities(CoordinatedExampleSensor(
         coord=xcoordinator, _unique_id=_uid) for _uid in _managed_entity_ids)
 
-    _LOEX = logging.getLogger(__name__ + ".experimental")
-    _LOEX.debug("hass.data")
-    _LOEX.debug(hass.data)
-
+    # 
+    # _LOEX.debug("hass.data")
+    # _LOEX.debug(hass.data)
 
     # 'custom_sensor_1': [<EntityPlatform domain=sensor platform_name=custom_sensor_1 config_entry=None>]}
     # 'custom_sensor_1': [<EntityPlatform domain=sensor platform_name=custom_sensor_1 config_entry=None>]}
@@ -209,9 +227,8 @@ async def async_setup_platform(hass: HomeAssistant, config: ConfigType, async_ad
     # 'custom_sensor_1': <Integration custom_sensor_1: custom_components.custom_sensor_1>},
     # 'custom_components': {'custom_sensor_1': <Integration custom_sensor_1: custom_components.custom_sensor_1>}
 
-    # , 'custom_sensor_1': [<EntityPlatform domain=sensor platform_name=custom_sensor_1 config_entry=None>]}, 
+    # , 'custom_sensor_1': [<EntityPlatform domain=sensor platform_name=custom_sensor_1 config_entry=None>]},
 
-    
 
 def log_debug_coordinator_data(_coord: MyCoordinator) -> None:
     _LOGGER.debug("current self.__coordinator.data:")
