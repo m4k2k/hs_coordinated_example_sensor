@@ -118,9 +118,6 @@ class CoordinatedExampleSensor(CoordinatorEntity[Any], SensorEntity):
     _attr_native_unit_of_measurement = TEMP_CELSIUS
     _attr_device_class = SensorDeviceClass.TEMPERATURE
     _attr_state_class = SensorStateClass.MEASUREMENT
-    _attr_extra_state_attributes: MutableMapping[str, Any]
-
-#    _attr_unique_id: str
 
     def get_sensor_value(self) -> int:
         """Retrieve the current sensor value from the coordinator
@@ -164,17 +161,14 @@ class CoordinatedExampleSensor(CoordinatorEntity[Any], SensorEntity):
         # gets triggered, triggers the pull of the data from the coordinator
         # gets triggered after the coordinator has finished getting updates
         self.update_all_data()
-        # self.async_write_ha_state()
-        return super()._handle_coordinator_update()
+        CoordinatorEntity._handle_coordinator_update(self)
 
     def __init__(self, coord: MyCoordinator, _unique_id: str) -> None:
-        # pyright: reportUnknownMemberType=information
-        CoordinatorEntity.__init__(self, coord)
+        "Pass self, coordinator to CoordinatorEntity."
+        CoordinatorEntity.__init__(self, coord)  # pyright: reportUnknownMemberType=information
+        "Pass self to SensorEntity."
         SensorEntity.__init__(self)
-        # super().__init__(coord)
-        # super(CoordinatorEntity).__init__(coord)
-        # super(SensorEntity).__init__()
-        """Pass coordinator to CoordinatorEntity."""
+
         self._LOGLCL.debug(
             "__init__ of CoordinatedExampleSensor %s", _unique_id)
         self._LOGLCL.debug("current _coordinator data:")
@@ -188,9 +182,9 @@ class CoordinatedExampleSensor(CoordinatorEntity[Any], SensorEntity):
         self._attr_extra_state_attributes: MutableMapping[str, Any] = dict(
             {"idx": "", "system_state": ""})
         self._attr_extra_state_attributes["idx"] = _unique_id
-        self.update_all_data()
         self._attr_unique_id = f"{_DOMAIN_}.{_unique_id}"
-        _LOEX.debug("self.unique_id: %a", self.unique_id)
+        self._LOGLCL.info("self.unique_id: %a", self.unique_id)
+        self.update_all_data()
 
 
 async def async_setup_platform(hass: HomeAssistant, config: ConfigType, async_add_entities: AddEntitiesCallback, discovery_info: DiscoveryInfoType | None = None) -> None:
@@ -213,21 +207,14 @@ async def async_setup_platform(hass: HomeAssistant, config: ConfigType, async_ad
     async_add_entities(CoordinatedExampleSensor(
         coord=xcoordinator, _unique_id=_uid) for _uid in _managed_entity_ids)
 
-    # 
+    #
     # _LOEX.debug("hass.data")
     # _LOEX.debug(hass.data)
 
-    # 'custom_sensor_1': [<EntityPlatform domain=sensor platform_name=custom_sensor_1 config_entry=None>]}
-    # 'custom_sensor_1': [<EntityPlatform domain=sensor platform_name=custom_sensor_1 config_entry=None>]}
 
     # 'integrations': {
-    # 'custom_sensor_1': <Integration custom_sensor_1: custom_components.custom_sensor_1>},
-    # 'custom_components': {'custom_sensor_1': <Integration custom_sensor_1: custom_components.custom_sensor_1>,
-    # 'example_sensor': <Integration example_sensor: custom_components.example_sensor>,
-    # 'custom_sensor_1': <Integration custom_sensor_1: custom_components.custom_sensor_1>},
     # 'custom_components': {'custom_sensor_1': <Integration custom_sensor_1: custom_components.custom_sensor_1>}
-
-    # , 'custom_sensor_1': [<EntityPlatform domain=sensor platform_name=custom_sensor_1 config_entry=None>]},
+    # 'custom_sensor_1': [<EntityPlatform domain=sensor platform_name=custom_sensor_1 config_entry=None>]}
 
 
 def log_debug_coordinator_data(_coord: MyCoordinator) -> None:
