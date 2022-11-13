@@ -12,11 +12,10 @@ New-Item -Path $log_file.Directory -Name $log_file.Name -ItemType File
 New-Item -Path "$conf_folder\" -Name $old_log_folder -ItemType Directory -ErrorAction Ignore
 Move-Item -Path "$conf_folder\$new_log_file" -Destination "$conf_folder\$old_log_folder\"
 
-$conf_entries_file = "$conf_folder\.storage\core.config_entries"
-$conf_registry_file = "$conf_folder\.storage\core.entity_registry"
-
-Remove-Item -Path $conf_entries_file
-Remove-Item -Path $conf_registry_file
+$files_to_clear = @('core.device_registry', 'core.config_entries', 'core.entity_registry')
+foreach ($_file in $files_to_clear) {
+    Remove-Item -Path "$conf_folder\.storage\$_file" -Force -ErrorAction Continue
+}
 
 docker run -it --rm `
     -e "TZ=Europe/Berlin" `
