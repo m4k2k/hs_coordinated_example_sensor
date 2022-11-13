@@ -1,14 +1,23 @@
 import logging
 
+from homeassistant.config_entries import ConfigEntry
+from homeassistant.const import Platform
+from homeassistant.core import HomeAssistant
+
 """Custom Sensor 1"""
 
 # TODO: inti coordinator here
 # TODO: see: https://github.com/jgriss/FusionSolarHA/blob/2549d3d490c8eb187e08ae0efa6c4de02df5dc02/custom_components/fusion_solar/__init__.py
 
-
 _DOMAIN_ = "custom_sensor_1"
 _LOGGER = logging.getLogger(__name__)
 _LOGGER.debug("Starting %s", __file__)
+
+async def async_setup_entry(hass: HomeAssistant, entry: ConfigEntry) -> bool:
+    """Set up from a config entry, forward to sensor setup"""
+    _LOGGER.debug("ENTER async_setup_entry of %s", __file__)
+    await hass.config_entries.async_forward_entry_setups(entry, [Platform.SENSOR])
+    return True
 
 
 # from homeassistant.config_entries import ConfigEntry
