@@ -8,9 +8,12 @@ from custom_components.custom_sensor_1.my_api.client import (DummyClass,
                                                              MyApiClient)
 from homeassistant.components.sensor import (SensorDeviceClass, SensorEntity,
                                              SensorStateClass)
+from homeassistant.config_entries import ConfigEntry
 from homeassistant.const import TEMP_CELSIUS
 from homeassistant.core import HomeAssistant, callback  # , State
+from homeassistant.helpers.entity import DeviceInfo
 from homeassistant.exceptions import ConfigEntryAuthFailed, PlatformNotReady
+from homeassistant.helpers import device_registry
 from homeassistant.helpers.entity_platform import AddEntitiesCallback
 from homeassistant.helpers.typing import ConfigType, DiscoveryInfoType
 from homeassistant.helpers.update_coordinator import (CoordinatorEntity,
@@ -28,6 +31,12 @@ HANDLED:
 
 
 """
+
+#TODO: Do device registration 
+#2 devices holds entitites
+#3 refind entitites
+#4 managed orphaned entities
+
 
 _DOMAIN_ = "custom_sensor_1"
 _LOGGER = logging.getLogger(__name__)
@@ -55,16 +64,6 @@ class MyCoordinator(DataUpdateCoordinator[Any]):
             # default is usually 30 seconds
             update_interval=timedelta(seconds=40)
         )
-        # super().__init__(
-        #     hass,
-        #     _LOGGER,
-        #     # Name of the data. For logging purposes.
-        #     name=_DOMAIN_,
-        #     update_method=self._async_update_data,
-        #     # Polling interval. Will only be polled if there are subscribers.
-        #     # default is usually 30 seconds
-        #     update_interval=timedelta(seconds=40),
-        # )
         self._my_api = my_api
         self._LOGLCL.debug("managed entity ids: %s", _managed_entity_ids)
 
@@ -92,11 +91,11 @@ class MyCoordinator(DataUpdateCoordinator[Any]):
                 self._LOGLCL.debug("returning cordinator_data:")
                 self._LOGLCL.debug(coordinator_data)
                 return coordinator_data
-
-        except ConfigEntryAuthFailed as err:
-            # Raising ConfigEntryAuthFailed will cancel future updates
-            # and start a config flow with SOURCE_REAUTH (async_step_reauth)
-            raise ConfigEntryAuthFailed from err
+        #TODO: ConfigEntryAuthFailed seems no vaild excpection: Find alternative exception (or correct import)
+        # except ConfigEntryAuthFailed as err:
+        #     # Raising ConfigEntryAuthFailed will cancel future updates
+        #     # and start a config flow with SOURCE_REAUTH (async_step_reauth)
+        #     raise ConfigEntryAuthFailed from err
         except UpdateFailed as err:
             raise UpdateFailed(f"Error communicating with API: {err}")
 
@@ -161,11 +160,41 @@ class CoordinatedExampleSensor(CoordinatorEntity[Any], SensorEntity):
         # gets triggered, triggers the pull of the data from the coordinator
         # gets triggered after the coordinator has finished getting updates
         self.update_all_data()
-        CoordinatorEntity._handle_coordinator_update(self)
+        CoordinatorEntity[Any]._handle_coordinator_update(self)
+
+    @property
+    def device_info(self) -> DeviceInfo:
+        """Return the device info."""
+        self._LOGLCL.debug("ENTER: device_info")
+        return DeviceInfo(
+            identifiers={
+                # Serial numbers are unique identifiers within a specific domain
+                (_DOMAIN_, "testdev01")
+            },
+            name="test dev xy",
+            manufacturer="test manufacturer",
+            model="test model",
+            sw_version="0.01",
+        )
+
+    # configuration_url: str | None
+    # connections: set[tuple[str, str]]     <<- required
+    # default_manufacturer: str             <<- required
+    # default_model: str                    <<- required
+    # default_name: str                     <<- required
+    # entry_type: DeviceEntryType | None
+    # identifiers: set[tuple[str, str]]     <<- required
+    # manufacturer: str | None
+    # model: str | None
+    # name: str | None
+    # suggested_area: str | None
+    # sw_version: str | None
+    # hw_version: str | None
+    # via_device: tuple[str, str]           <<- required
 
     def __init__(self, coord: MyCoordinator, _unique_id: str) -> None:
         "Pass self, coordinator to CoordinatorEntity."
-        CoordinatorEntity.__init__(self, coord)  # pyright: reportUnknownMemberType=information
+        CoordinatorEntity.__init__(self, coord)  # pyright: reportUnknownMemberType=false
         "Pass self to SensorEntity."
         SensorEntity.__init__(self)
 
@@ -187,7 +216,19 @@ class CoordinatedExampleSensor(CoordinatorEntity[Any], SensorEntity):
         self.update_all_data()
 
 
-async def async_setup_platform(hass: HomeAssistant, config: ConfigType, async_add_entities: AddEntitiesCallback, discovery_info: DiscoveryInfoType | None = None) -> None:
+async def async_setup_entry(hass: HomeAssistant, entry: ConfigEntry, async_add_entities: AddEntitiesCallback) -> None:
+    _LOEX.debug("ENTER async_setup_entry %s", __file__)
+    dr = device_registry.async_get(hass)
+    _LOEX.debug("create new device")
+
+    # make sure device is created, even if no entity is present (usecase: show metadata like firmware version, etc.)
+    dev1: device_registry.DeviceEntry = dr.async_get_or_create(
+        config_entry_id=entry.entry_id,
+        identifiers={(_DOMAIN_, "testdev01")},
+        name="my test device",
+        sw_version="0.02",
+    )
+
     """Set up platform."""
     _LOGGER.debug("async_setup_platform of %s", __file__)
 
@@ -207,10 +248,33 @@ async def async_setup_platform(hass: HomeAssistant, config: ConfigType, async_ad
     async_add_entities(CoordinatedExampleSensor(
         coord=xcoordinator, _unique_id=_uid) for _uid in _managed_entity_ids)
 
-    #
-    # _LOEX.debug("hass.data")
-    # _LOEX.debug(hass.data)
+    _LOEX.debug("hass.data")
+    _LOEX.debug(hass.states.async_all(_DOMAIN_))
+    # from homeassistant.const import Platform
+    # plat: list[Platform] = [Platform.SENSOR]
+    
+    # await hass.config_entries.async_forward_entry_setups(
+    #     entry, plat
+    # )
 
+
+    _LOEX.debug("my new device:")
+    _LOEX.debug(dev1)
+    _LOEX.debug("EXIT async_setup_entry")
+
+    #TODO: check    async_add_devices
+
+    # dr.async_get_or_create(
+    # config_entry_id=entry.entry_id,
+    # connections={(device_registry.CONNECTION_NETWORK_MAC, config.mac)},
+    # identifiers={(_DOMAIN_, config.bridgeid)},
+    # manufacturer="Signify",
+    # suggested_area="Kitchen",
+    # name=config.name,
+    # model=config.modelid,
+    # sw_version=config.swversion,
+    # hw_version=config.hwversion,
+    # )
 
     # 'integrations': {
     # 'custom_components': {'custom_sensor_1': <Integration custom_sensor_1: custom_components.custom_sensor_1>}
