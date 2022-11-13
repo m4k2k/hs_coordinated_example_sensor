@@ -1,12 +1,50 @@
 
-# Loads default set of integrations. Do not remove.
-default_config:
+# Loads default set of integrations.
+# default_config:
+
+application_credentials:
+automation:
+#bluetooth:
+#cloud:
+counter:
+dhcp:
+#energy:
+frontend:
+hardware:
+history:
+homeassistant_alerts:
+input_boolean:
+input_button:
+input_datetime:
+input_number:
+input_select:
+input_text:
+logbook:
+#map:
+media_source:
+mobile_app:
+my:
+network:
+person:
+scene:
+schedule:
+script:
+#ssdp:
+sun:
+system_health:
+tag:
+timer:
+#usb:
+webhook:
+#zeroconf:
+zone:
+
+
 
 debugpy:
   start: true
   #wait: true
   wait: false
-  #host: 127.0.0.1
   host: 172.17.0.2
   port: 6712
 
@@ -21,44 +59,55 @@ debugpy:
 
 # Example configuration.yaml entry
 
-# custom_sensor_1:
+# sensor:
+#   - platform: custom_sensor_1
 
-sensor:
-  - platform: custom_sensor_1
+
 #  - platform: example_sensor
 
 # Example configuration.yaml entry
 logger:
-  default: fatal
+# critical
+# fatal
+# error
+# warning
+# warn
+# info
+# debug
+# notset
+  default: info
   logs:
-    # log level for HA core
-    homeassistant.core: fatal
+    homeassistant.core: info
+    homeassistant.loader: warning
+    homeassistant.bootstrap: warning
+    homeassistant.helpers: info
+    homeassistant.helpers.entity_registry: info
 
-    # log level for MQTT integration
-    homeassistant.components.mqtt: fatal
+    homeassistant.setup: warning
 
-    # log level for the `aiohttp` Python package
+    asyncio: error
     aiohttp: error
+    glances_api: error
+    matplotlib.font_manager: error
+    homeassistant.components.websocket_api.http.connection: error
+    homeassistant.components.recorder.util: error
 
-    # log level for both 'glances_api' and 'glances' integration
-    homeassistant.components.glances: fatal
-    glances_api: fatal
+    homeassistant.components.zeroconf: error
+    homeassistant.components.glances: error
+    homeassistant.components.scene: error
+    homeassistant.components.notify: error
+    homeassistant.components.mqtt: error
+    homeassistant.components.python_script: error
 
-    homeassistant.loader: fatal
-
-    # log level for all python scripts
-    homeassistant.components.python_script: fatal
-
-    # individual log level for this python script
-    # homeassistant.components.python_script.my_new_script.py: debug
-
-    # log level for a custom component
-    custom_components.custom_sensor_1: fatal
-    custom_components.custom_sensor_1.my_api: fatal
-    custom_components.custom_sensor_1.sensor: fatal
-    custom_components.custom_sensor_1.sensor.MyCoordinator: fatal
-    custom_components.custom_sensor_1.sensor.CoordinatedExampleSensor: fatal
+    custom_components.custom_sensor_1: debug
+    custom_components.custom_sensor_1.my_api: error
+    custom_components.custom_sensor_1.sensor: error
+    custom_components.custom_sensor_1.sensor.MyCoordinator: error
+    custom_components.custom_sensor_1.sensor.CoordinatedExampleSensor: error
     custom_components.custom_sensor_1.sensor.experimental: debug
-    custom_components.custom_sensor_1.sensor.debug_domains: fatal
-    custom_components.custom_sensor_1.sensor.debug_entities_all: fatal
-    custom_components.custom_sensor_1.sensor.debug_entity_ids: fatal
+    custom_components.custom_sensor_1.sensor.debug_domains: error
+    custom_components.custom_sensor_1.sensor.debug_entities_all: error
+    custom_components.custom_sensor_1.sensor.debug_entity_ids: error
+    custom_components.custom_sensor_1.config_flow: debug
+    custom_components.custom_sensor_1.__init__: debug
+
