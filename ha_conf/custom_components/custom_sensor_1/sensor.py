@@ -10,43 +10,30 @@ from homeassistant.components.sensor import (SensorDeviceClass, SensorEntity,
                                              SensorStateClass)
 from homeassistant.config_entries import ConfigEntry
 from homeassistant.const import TEMP_CELSIUS
-from homeassistant.core import HomeAssistant, callback  # , State
+from homeassistant.core import HomeAssistant, callback
 from homeassistant.helpers.entity import DeviceInfo
-from homeassistant.exceptions import ConfigEntryAuthFailed, PlatformNotReady
+from homeassistant.exceptions import PlatformNotReady
 from homeassistant.helpers import device_registry
 from homeassistant.helpers.entity_platform import AddEntitiesCallback
-from homeassistant.helpers.typing import ConfigType, DiscoveryInfoType
 from homeassistant.helpers.update_coordinator import (CoordinatorEntity,
                                                       DataUpdateCoordinator,
                                                       UpdateFailed)
 
 """Example integration using DataUpdateCoordinator.
 
-What is handled - and what is not:
-
-NOT:
-- delete orphaned entities (Currently no orphaned or old/outdated entities are detected and removed)
-
-HANDLED:
-
 
 """
 
-#TODO: Do device registration 
-#2 devices holds entitites
-#3 refind entitites
-#4 managed orphaned entities
-
-
 _DOMAIN_ = "custom_sensor_1"
 _LOGGER = logging.getLogger(__name__)
-_LOEX = logging.getLogger(__name__ + ".experimental")
 _LOGGER.debug("Starting %s", __file__)
 
+# ids for entities
 _managed_entity_ids: list[str] = []
 
 
 class MyCoordinator(DataUpdateCoordinator[Any]):
+    # Initialize API Client
     _my_api: MyApiClient
     _LOGLCL = logging.getLogger(__name__ + ".MyCoordinator")
     _LOGLCL.debug("Class MyCoordinator of %s", __file__)
@@ -217,9 +204,9 @@ class CoordinatedExampleSensor(CoordinatorEntity[Any], SensorEntity):
 
 
 async def async_setup_entry(hass: HomeAssistant, entry: ConfigEntry, async_add_entities: AddEntitiesCallback) -> None:
-    _LOEX.debug("ENTER async_setup_entry %s", __file__)
+    _LOGGER.debug("ENTER async_setup_entry %s", __file__)
     dr = device_registry.async_get(hass)
-    _LOEX.debug("create new device")
+    _LOGGER.debug("create new device")
 
     # make sure device is created, even if no entity is present (usecase: show metadata like firmware version, etc.)
     dev1: device_registry.DeviceEntry = dr.async_get_or_create(
@@ -228,6 +215,9 @@ async def async_setup_entry(hass: HomeAssistant, entry: ConfigEntry, async_add_e
         name="my test device",
         sw_version="0.02",
     )
+
+    _LOGGER.debug("my new device:")
+    _LOGGER.debug(dev1)
 
     """Set up platform."""
     _LOGGER.debug("async_setup_platform of %s", __file__)
@@ -248,37 +238,9 @@ async def async_setup_entry(hass: HomeAssistant, entry: ConfigEntry, async_add_e
     async_add_entities(CoordinatedExampleSensor(
         coord=xcoordinator, _unique_id=_uid) for _uid in _managed_entity_ids)
 
-    _LOEX.debug("hass.data")
-    _LOEX.debug(hass.states.async_all(_DOMAIN_))
-    # from homeassistant.const import Platform
-    # plat: list[Platform] = [Platform.SENSOR]
-    
-    # await hass.config_entries.async_forward_entry_setups(
-    #     entry, plat
-    # )
-
-
-    _LOEX.debug("my new device:")
-    _LOEX.debug(dev1)
-    _LOEX.debug("EXIT async_setup_entry")
-
-    #TODO: check    async_add_devices
-
-    # dr.async_get_or_create(
-    # config_entry_id=entry.entry_id,
-    # connections={(device_registry.CONNECTION_NETWORK_MAC, config.mac)},
-    # identifiers={(_DOMAIN_, config.bridgeid)},
-    # manufacturer="Signify",
-    # suggested_area="Kitchen",
-    # name=config.name,
-    # model=config.modelid,
-    # sw_version=config.swversion,
-    # hw_version=config.hwversion,
-    # )
-
-    # 'integrations': {
-    # 'custom_components': {'custom_sensor_1': <Integration custom_sensor_1: custom_components.custom_sensor_1>}
-    # 'custom_sensor_1': [<EntityPlatform domain=sensor platform_name=custom_sensor_1 config_entry=None>]}
+    _LOGGER.debug("hass.states")
+    _LOGGER.debug(hass.states.async_all(_DOMAIN_))
+    _LOGGER.debug("EXIT async_setup_entry")
 
 
 def log_debug_coordinator_data(_coord: MyCoordinator) -> None:
