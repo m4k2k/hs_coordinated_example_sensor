@@ -22,7 +22,8 @@ class TestConfigFlow(config_entries.ConfigFlow):
         self, user_input: dict[str, Any] | None = None
     ) -> data_entry_flow.FlowResult:
         """Handle a flow, without user intaction """
-        _LOGGER.debug("ENTER async_step_user of TestConfigFlow in %s", __file__)
+        _LOGGER.debug(
+            "ENTER async_step_user of TestConfigFlow in %s", __file__)
         # Set unique ID
         await self.async_set_unique_id("testdev01")
         # If unique ID is already present, abort and exist config setup,

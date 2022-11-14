@@ -54,8 +54,6 @@ class MyCoordinator(DataUpdateCoordinator[Any]):
         self._my_api = my_api
         self._LOGLCL.debug("managed entity ids: %s", _managed_entity_ids)
 
-    # TODO: Replace dict[DummyClass]
-    # -> in this case a list of dummyclass is stored - but it doesnt need to be a dict
     async def _async_update_data(self) -> dict[Any, Any]:
         """Fetch data from API endpoint.
         This is the place to pre-process the data to lookup tables
@@ -283,9 +281,6 @@ def log_debug_entity_ids(_hass: HomeAssistant):
     for r in re:
         _LOGLCL.debug(r)
     _LOGLCL.debug("LEAVE: log_entity_ids")
-    # ent = integration_entities(hass,_DOMAIN_)
-    # _LOGGER.debug("entieees")
-    # _LOGGER.debug(ent)
 
 
 def log_debug_entities_all(_hass: HomeAssistant):
