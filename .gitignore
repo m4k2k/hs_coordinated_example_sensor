@@ -13,4 +13,5 @@
 */__pycache__/*
 *.pyc
 /ha_conf/old_logs/*
-/ha_conf/custom_components/custom_sensor_1/LOP.md
+/*.md
+*.code-workspace
