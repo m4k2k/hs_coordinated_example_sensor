@@ -9,8 +9,8 @@
 /ha_conf/scripts.yaml
 /ha_conf/secrets.yaml
 /ha_conf/automations.yaml
-/ha_conf/custom_components/nintendo_wishlist/*
 
 */__pycache__/*
 *.pyc
-ha_conf/old_logs/*
+/ha_conf/old_logs/*
+/ha_conf/custom_components/custom_sensor_1/LOP.md
