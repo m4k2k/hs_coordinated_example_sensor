@@ -14,4 +14,6 @@
 *.pyc
 /ha_conf/old_logs/*
 /*.md
+
 *.code-workspace
+!/README.md
