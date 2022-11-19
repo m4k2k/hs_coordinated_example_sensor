@@ -8,15 +8,15 @@ Debug utils for Homeassistant
 """
 
 
-_LOGGER = logging.getLogger(__name__)
+_LOGGER = logging.getLogger(__name__ + ".debug")
 _LOGGER.debug("Starting %s", __file__)
 
 
 # Specific
 
-def log_debug_coordinator_data(_coord: MyCoordinator) -> None:
+def log_debug_coordinator_data(_my_coordinator: MyCoordinator) -> None:
     _LOGGER.debug("current self.__coordinator.data:")
-    _LOGGER.debug(_coord.data)
+    _LOGGER.debug(_my_coordinator.data)
 
 
 # Generic
@@ -38,11 +38,11 @@ def log_debug_domains(_hass: HomeAssistant):
     _LOGLCL.debug("LEAVE: log_domains")
 
 
-def log_debug_other(coo: MyCoordinator, hass: HomeAssistant, dom: str):
+def log_debug_other(_my_coordinator: MyCoordinator, _hass: HomeAssistant, _domain: str):
     _LOGGER.debug("current coordinator data:")
-    _LOGGER.debug(coo.data)
+    _LOGGER.debug(_my_coordinator.data)
     _LOGGER.debug("hass-data")
-    _LOGGER.debug(hass.data['integrations'][dom])
+    _LOGGER.debug(_hass.data['integrations'][_domain])
 
 
 def log_debug_entity_ids(_hass: HomeAssistant):
@@ -66,3 +66,8 @@ def log_debug_entities_all(_hass: HomeAssistant):
     for r in re:
         _LOGLCL.debug(r)
     _LOGLCL.debug("LEAVE: log_entities_all")
+
+
+def log_debug_hass_states(_hass: HomeAssistant, _domain: str):
+    _LOGGER.debug("hass.states")
+    _LOGGER.debug(_hass.states.async_all(_domain))

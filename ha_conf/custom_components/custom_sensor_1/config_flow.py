@@ -8,7 +8,7 @@ _DOMAIN_ = "custom_sensor_1"
 _LOGGER = logging.getLogger(__name__)
 _LOGGER.debug("START %s", __file__)
 
-
+#! filename needs to be "config_flow.py"
 @config_entries.HANDLERS.register(_DOMAIN_)
 class TestConfigFlow(config_entries.ConfigFlow):
 

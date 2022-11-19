@@ -102,6 +102,7 @@ logger:
     custom_components.custom_sensor_1: debug
     custom_components.custom_sensor_1.my_api: error
     custom_components.custom_sensor_1.sensor: error
+    custom_components.custom_sensor_1.debug: debug
     custom_components.custom_sensor_1.sensor.MyCoordinator: error
     custom_components.custom_sensor_1.sensor.CoordinatedExampleSensor: error
     custom_components.custom_sensor_1.sensor.experimental: debug

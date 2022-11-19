@@ -20,3 +20,7 @@ The prototype is still lacking some implementation which is found in best pratic
 * ❎ refind entitites
 * ❎ managed orphaned entities
 * 🟩 use const.py file for constants
+
+# TODO BEFORE GITHUB
+* move classes to subfiles
+* 

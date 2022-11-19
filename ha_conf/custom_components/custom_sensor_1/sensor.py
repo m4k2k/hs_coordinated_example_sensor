@@ -2,12 +2,13 @@ import logging
 from collections.abc import MutableMapping
 from datetime import timedelta
 from typing import Any
-
 import async_timeout
-from custom_components.custom_sensor_1.my_api.client import (DummyClass,
-                                                             MyApiClient)
-from homeassistant.components.sensor import (SensorDeviceClass, SensorEntity,
-                                             SensorStateClass)
+from custom_components.custom_sensor_1.my_api.client import (
+    DummyClass, MyApiClient)
+from homeassistant.helpers.update_coordinator import (
+    DataUpdateCoordinator, UpdateFailed)
+from homeassistant.components.sensor import (
+    SensorDeviceClass, SensorEntity, SensorStateClass)
 from homeassistant.config_entries import ConfigEntry
 from homeassistant.const import TEMP_CELSIUS
 from homeassistant.core import HomeAssistant, callback
@@ -15,9 +16,7 @@ from homeassistant.helpers.entity import DeviceInfo
 from homeassistant.exceptions import PlatformNotReady
 from homeassistant.helpers import device_registry
 from homeassistant.helpers.entity_platform import AddEntitiesCallback
-from homeassistant.helpers.update_coordinator import (CoordinatorEntity,
-                                                      DataUpdateCoordinator,
-                                                      UpdateFailed)
+from homeassistant.helpers.update_coordinator import CoordinatorEntity
 
 """Example integration using DataUpdateCoordinator.
 
@@ -28,17 +27,72 @@ _DOMAIN_ = "custom_sensor_1"
 _LOGGER = logging.getLogger(__name__)
 _LOGGER.debug("Starting %s", __file__)
 
-# ids for entities
+# holds ids for entities
 _managed_entity_ids: list[str] = []
 
+
+# # holds ids for entities
+# _managed_entity_ids: list[str] = []
+
+
+# class MyCoordinator(DataUpdateCoordinator[Any]):
+#     # Initialize API Client
+#     _my_api: MyApiClient
+#     # Get logger with suffix
+#     _LOGLCL = logging.getLogger(__name__ + ".MyCoordinator")
+#     _LOGLCL.debug("Class MyCoordinator of %s", __file__)
+
+#     def __init__(self, hass: HomeAssistant, my_api: MyApiClient):
+#         """Initialize MyCoordinator Class"""
+#         self._LOGLCL.debug("__init__ of MyCoordinator Class")
+#         DataUpdateCoordinator.__init__(
+#             self=self,
+#             hass=hass,
+#             logger=_LOGGER,
+#             # Name of the data. For logging purposes.
+#             name=_DOMAIN_,
+#             update_method=self._async_update_data,
+#             # Polling interval. Will only be polled if there are subscribers.
+#             # default is usually 30 seconds
+#             update_interval=timedelta(seconds=40)
+#         )
+#         self._my_api = my_api
+#         self._LOGLCL.debug("managed entity ids: %s", _managed_entity_ids)
+
+#     async def _async_update_data(self) -> dict[Any, Any]:
+#         """Fetch data from API endpoint.
+#         This is the place to pre-process the data to lookup tables
+#         so entities can quickly look up their data.
+#         """
+#         self._LOGLCL.debug("_async_update_data of MyCoordinator")
+#         try:
+#             # Note: asyncio.TimeoutError and aiohttp.ClientError are already
+#             # handled by the data update coordinator.
+#             async with async_timeout.timeout(10):
+#                 self._LOGLCL.debug("start self.my_api.get_dummy_data()")
+#                 # call api to get the data object
+#                 # put the dataobject into the HA-store
+#                 coordinator_data: dict[Any, Any] = {}
+#                 for __uid in _managed_entity_ids:
+#                     self._LOGLCL.debug("calling api for id: %s", __uid)
+#                     # here you could also do an if id = "abc" then talk to api-a else api-b
+#                     dummy_data: DummyClass = self._my_api.get_dummy_data()
+#                     coordinator_data[__uid] = dummy_data
+#                 self._LOGLCL.debug("returning cordinator_data:")
+#                 self._LOGLCL.debug(coordinator_data)
+#                 return coordinator_data
+#         except UpdateFailed as err:
+#             raise UpdateFailed(f"Error communicating with API: {err}")
 
 class MyCoordinator(DataUpdateCoordinator[Any]):
     # Initialize API Client
     _my_api: MyApiClient
+    # Get logger with suffix
     _LOGLCL = logging.getLogger(__name__ + ".MyCoordinator")
     _LOGLCL.debug("Class MyCoordinator of %s", __file__)
 
     def __init__(self, hass: HomeAssistant, my_api: MyApiClient):
+        """Initialize MyCoordinator Class"""
         self._LOGLCL.debug("__init__ of MyCoordinator Class")
         DataUpdateCoordinator.__init__(
             self=self,
@@ -76,11 +130,6 @@ class MyCoordinator(DataUpdateCoordinator[Any]):
                 self._LOGLCL.debug("returning cordinator_data:")
                 self._LOGLCL.debug(coordinator_data)
                 return coordinator_data
-        #TODO: ConfigEntryAuthFailed seems no vaild excpection: Find alternative exception (or correct import)
-        # except ConfigEntryAuthFailed as err:
-        #     # Raising ConfigEntryAuthFailed will cancel future updates
-        #     # and start a config flow with SOURCE_REAUTH (async_step_reauth)
-        #     raise ConfigEntryAuthFailed from err
         except UpdateFailed as err:
             raise UpdateFailed(f"Error communicating with API: {err}")
 
@@ -147,6 +196,8 @@ class CoordinatedExampleSensor(CoordinatorEntity[Any], SensorEntity):
         self.update_all_data()
         CoordinatorEntity[Any]._handle_coordinator_update(self)
 
+    # Add device info, creates device if not exists.
+    # Here we add more information which was not yet added to the device.
     @property
     def device_info(self) -> DeviceInfo:
         """Return the device info."""
@@ -161,7 +212,7 @@ class CoordinatedExampleSensor(CoordinatorEntity[Any], SensorEntity):
             model="test model",
             sw_version="0.01",
         )
-
+    # All available device properties
     # configuration_url: str | None
     # connections: set[tuple[str, str]]     <<- required
     # default_manufacturer: str             <<- required
@@ -178,9 +229,10 @@ class CoordinatedExampleSensor(CoordinatorEntity[Any], SensorEntity):
     # via_device: tuple[str, str]           <<- required
 
     def __init__(self, coord: MyCoordinator, _unique_id: str) -> None:
-        "Pass self, coordinator to CoordinatorEntity."
-        CoordinatorEntity.__init__(self, coord)  # pyright: reportUnknownMemberType=false
-        "Pass self to SensorEntity."
+        # Pass self, coordinator and unique_id to CoordinatorEntity
+        # pyright: reportUnknownMemberType=false
+        CoordinatorEntity.__init__(self, coord)
+        # Pass self to SensorEntity
         SensorEntity.__init__(self)
 
         self._LOGLCL.debug(
@@ -202,11 +254,13 @@ class CoordinatedExampleSensor(CoordinatorEntity[Any], SensorEntity):
 
 
 async def async_setup_entry(hass: HomeAssistant, entry: ConfigEntry, async_add_entities: AddEntitiesCallback) -> None:
+    """Main Setup File"""
     _LOGGER.debug("ENTER async_setup_entry %s", __file__)
     dr = device_registry.async_get(hass)
     _LOGGER.debug("create new device")
 
     # make sure device is created, even if no entity is present (usecase: show metadata like firmware version, etc.)
+    # device doesnt need to be captured here, just create as many devices as required (e.g. in a loop)
     dev1: device_registry.DeviceEntry = dr.async_get_or_create(
         config_entry_id=entry.entry_id,
         identifiers={(_DOMAIN_, "testdev01")},
@@ -217,8 +271,7 @@ async def async_setup_entry(hass: HomeAssistant, entry: ConfigEntry, async_add_e
     _LOGGER.debug("my new device:")
     _LOGGER.debug(dev1)
 
-    """Set up platform."""
-    _LOGGER.debug("async_setup_platform of %s", __file__)
+    _LOGGER.debug("Set up platform Ex - async_setup_platform")
 
     _managed_entity_ids.append("uzttra")
     _managed_entity_ids.append("f1")
@@ -236,6 +289,4 @@ async def async_setup_entry(hass: HomeAssistant, entry: ConfigEntry, async_add_e
     async_add_entities(CoordinatedExampleSensor(
         coord=xcoordinator, _unique_id=_uid) for _uid in _managed_entity_ids)
 
-    _LOGGER.debug("hass.states")
-    _LOGGER.debug(hass.states.async_all(_DOMAIN_))
     _LOGGER.debug("EXIT async_setup_entry")
